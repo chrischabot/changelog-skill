@@ -1,0 +1,4 @@
+interface:
+  display_name: "Changelog"
+  short_description: "Turn repository history into useful engineering updates"
+  default_prompt: "Use $changelog to produce an engineering update for these repositories and dates."
