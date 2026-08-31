@@ -70,15 +70,23 @@ Publishing is a conditional follow-up, not an automatic side effect of requestin
 
 ## Validation and development
 
-Run the deterministic collector tests with:
+Run the deterministic collector and evaluation-runner tests with:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-They cover calendar and daylight-saving boundaries, older merged commits, repository aliases, conflicting revisions, shallow history, empty windows, and preservation of source files and previous evidence.
+They cover calendar and daylight-saving boundaries, older merged commits, repository aliases, conflicting revisions, shallow history, empty windows, and preservation of source files and previous evidence. Runner tests check withheld answers, immutable submissions, stale reviews, missing audit items, fabricated quotations, unresolved findings and shortening constraints.
 
 Writing quality needs a different test. The [validation protocol](changelog/references/validation.md) runs the complete skill without revealing the accepted report, then compares coverage, factual fidelity, clarity, and useful links. It does not grade by matching wording or section counts. See [VALIDATION.md](VALIDATION.md) for the results and limits of this release's replay.
+
+The [runnable eval suite](changelog/evals/README.md) packages that process with synthetic multi-repository, shortening and invocation cases, plus a private-repository replay adapter. It separates writer and reviewer packets, freezes each draft, records sentence and paragraph reviews, and rejects stale or incomplete assessments. It never treats passing structural checks as proof of good writing.
+
+```bash
+python3 changelog/scripts/evaluate.py prepare --case fortnight --output "$HOME/changelog-evals/run-01"
+```
+
+The command prepares the task; it does not call a model service. Follow the returned writer request, capture the output, and have it reviewed using the suite's instructions.
 
 The workflow draws on [Servo's engineering-update process](https://github.com/servo/servo.org#how-to-write-a-monthly-update), [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and [Google's developer documentation guidance](https://developers.google.com/style/highlights). The [source notes](changelog/references/sources.md) explain how the guidance is applied.
 

@@ -2,6 +2,8 @@
 
 Frontmatter validation and script tests do not establish writing quality. Test behavior on a complete, realistic reporting window.
 
+Use the [runnable evaluation suite](../evals/README.md) to preserve this process in files. `scripts/evaluate.py` provides `prepare`, `capture` and `score` commands, synthetic writing/compression/routing cases, and a private external-replay adapter. It keeps the holdout separate, binds reviews to exact submissions and retains failed and informed attempts. A writing run cannot receive `reviewed_pass` without a completed quality review.
+
 ## Blind replay
 
 When independent agent evaluation is available and authorized, give a fresh evaluator only this skill, the user-style request, repository access, dates/timezone, pinned revisions needed for reproduction, and a private output directory. Do not supply the accepted report, expected outline, desired scores, known failure, or proposed fix. Do not reuse an evaluator that already knows the reference answer.

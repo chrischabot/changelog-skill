@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "cases": {
+    "fortnight": {
+      "description": "Two small Git repositories with cross-cutting fixes, a superseded guarantee, corrected measurements, later commits and dirty work.",
+      "artifacts": ["changelog.md", "evidence-ledger.md", "workflow-review.md"],
+      "criteria": [
+        {"id": "export-recovery", "requirement": "Explain that the new shared CSV exporter resumes saved batch checkpoints; replayed sends require destination deduplication. Two real apps consume it. PDF recovery is outside the window; do not claim a fleet deployment.", "sources": ["labs/packages/exportkit/exporter.py", "labs/apps/invoices/main.py", "labs/apps/analytics/main.py"]},
+        {"id": "independent-fixes", "requirement": "Include cleanup of obsolete archive chunks and repair of dropped query parameters, despite generic maintenance subjects and adjacent cosmetic changes. Separate these outcomes.", "sources": ["labs/apps/archive/storage.py", "core/runtime/routes.py"]},
+        {"id": "notifications", "requirement": "Explain the shared notification integration and retrying the saved delivery outcome without sending again. Do not merge it with exports merely because both are packages.", "sources": ["labs/packages/notify/delivery.py"]},
+        {"id": "superseded-guarantee", "requirement": "Do not claim the booking's seat reservation and record are atomic: the later rewrite uses separate writes. Exclude or accurately qualify the superseded repair.", "sources": ["labs/apps/bookings/store.py"]},
+        {"id": "scores", "requirement": "Lead with working-app completion within budget: Client A 5/5, Client B 2/5, combined 7/10; two B results unverified. Browser-only confirmation is 8/10. Rechecking unchanged artifacts is not evidence of product improvement from 2/10 to 8/10.", "sources": ["labs/evidence/attempts.json", "labs/evidence/recheck.json"]},
+        {"id": "access-limits", "requirement": "Describe narrower application authorization while retaining permitted account metadata reads. Lifetime constants do not enforce expiry. Shared login has a fail-open consumer and non-atomic nonce consumption; do not claim reliable restricted access or single-use handoffs.", "sources": ["core/runtime/tokens.py", "labs/packages/login/gate.py", "labs/apps/portal/main.py"]},
+        {"id": "registry-count", "requirement": "Recount two baseline packages and four cutoff packages; generated copies and tests are not consumers or extra packages.", "sources": ["labs/packages/registry.json"]},
+        {"id": "historical-scope", "requirement": "Use June 2–15 inclusive UTC and count the Core alias once. Do not promote the later PDF addition or dirty deployment claim into the report. Existing HTML rendering is not a new framework.", "sources": ["core/runtime/render.py", "labs/evidence/status.md"]},
+        {"id": "link-honesty", "requirement": "No real hosted guides or demos exist for these fictional projects. Omit invented destinations and machine-specific evidence links from reader prose; record this limit separately.", "sources": ["labs/README.md"]}
+      ]
+    },
+    "compression": {
+      "description": "Reduce a supplied update by approximately one third without losing its results, context or adoption limits.",
+      "artifacts": ["changelog.md", "workflow-review.md"],
+      "reduction": {"minimum": 0.28, "maximum": 0.38},
+      "criteria": [
+        {"id": "results-preserved", "requirement": "Keep Client A 5/5 and Client B 2/5 within budget, 7/10 combined, and two unverified B results. Do not substitute 8/10 browser confirmation or imply a causal product improvement."},
+        {"id": "limits-preserved", "requirement": "Keep CSV-only checkpoint recovery, PDF restart behavior, and shared-login fail-open/non-atomic limits."},
+        {"id": "selection-not-fragments", "requirement": "Remove procedure and repeated explanations before compressing core messages; retain natural complete sentences and understandable components."}
+      ]
+    },
+    "routing": {
+      "description": "Explicit invocation, natural-language dates, missing inputs and a non-trigger. This tests instruction conformance, not host autodiscovery.",
+      "artifacts": ["routing.json"],
+      "criteria": [],
+      "expected_routes": [
+        {"id": "explicit", "action": "apply", "start": "2026-06-01", "end": "2026-06-14", "timezone": "Europe/London"},
+        {"id": "relative", "action": "apply", "start": "2026-06-01", "end": "2026-06-14", "timezone": "UTC"},
+        {"id": "missing", "action": "request_inputs", "missing": ["repositories", "dates"]},
+        {"id": "non-trigger", "action": "do_not_apply"}
+      ]
+    }
+  }
+}

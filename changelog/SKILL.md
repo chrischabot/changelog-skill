@@ -104,3 +104,5 @@ Share direct links to the files and identify material unresolved limits. Do not 
 If publishing is requested, follow the conditional workflow in [review-and-publish.md](references/review-and-publish.md): respect any full-text approval gate, preserve unrelated work, use the documented build, verify the final page and useful links, commit only authorized changes, and distinguish publication from live verification. Existing authorization persists; do not ask again merely because the workflow reached a new step.
 
 When testing or revising this skill itself, use [validation.md](references/validation.md) for a blind replay and comparison by meaning rather than textual similarity.
+
+The [packaged evaluation suite](evals/README.md) provides runnable synthetic and private-repository cases: prepare a writer packet, capture immutable outputs, then score an explicit factual and editorial review. Use it for skill evaluation, not as an extra ceremony for every ordinary changelog request.
