@@ -1,14 +1,40 @@
-# Changelog
+# Changelog skill
 
-An agent skill for turning work across one or more repositories into an engineering update people can actually read.
+Changelog is an agent skill that turns the work in one or more Git repositories into an engineering update people can actually read. Give a coding agent the repositories and a date range, and it researches what changed, brings related commits together and writes a complete changelog that explains what was built, improved or fixed, why it matters and any limitation that affects how it can be used. It is for whoever owes the team a fortnightly or monthly update, and for the senior engineers and technical leaders who have to read one.
 
-Give it the repositories and a date range. It researches what changed, brings related commits together, and writes a substantial changelog for engineers and technical leadership. Each update explains what was built, improved, or fixed, why it matters, and any limitation that affects how it can be used.
+It exists because repository history records work in the order it happened, while a reader wants to know what that work achieved. A framework might take dozens of commits to become usable, an important repair can sit inside a commit called "Maintenance work", and a branch written last month may only land this week. A summary of the log recovers none of that, so the writer has to read the diffs, decide which changes add up to one capability, and keep what was merged apart from what was deployed or verified in use. This skill makes that editorial judgment explicit and keeps the evidence behind it available for checking.
 
-Repository history records the work as it happened. A useful changelog has to reconstruct what that work achieved. A framework might take dozens of commits to become usable; an important recovery fix might take one. This skill makes that editorial judgment explicit and keeps the evidence behind it available for checking.
+## How it works
 
-## Use it
+The skill is a written procedure for the agent, supported by two small Python tools where a rule can be enforced in code.
 
-In Codex, invoke the installed skill with a request such as:
+Research starts from a complete inventory. The collector turns inclusive calendar dates in an explicit timezone into a baseline and a cutoff revision for each repository, then lists every commit reachable from the cutoff but not the baseline, which picks up older work merged during the window that `git log --since` can omit. It rejects shallow clones, which cannot show the full history, and leaves a dirty checkout as it found it.
+
+The agent then reads the diffs and the code as it stood at the cutoff, and writes an evidence ledger before any prose: for each candidate change, its sources, the earlier behavior, what changed, the consequence the evidence supports, how ready it is and any numbers with their denominators. Commits are combined only when they produce one outcome for the reader, so the fixes that made a feature usable travel with it, while two integrations that merely share a directory stay separate. Each entry is drafted from a single message, "the change is ___; the reader gains or needs to know ___", and the whole document then goes through separate factual and editorial reviews. The editorial pass asks what job each sentence is doing and moves research narration into the ledger. Reader links are opened and checked for relevance, because a 200 response can still be a login page.
+
+A run delivers a complete Markdown changelog ordered by significance, the evidence ledger, and a short note recording the cutoff, the checks performed and any limits left unresolved. The length follows the amount of noteworthy work rather than a fixed number of themes, and a single entry looks like this synthetic example:
+
+> **Scheduled exports resume after a worker restart**
+>
+> Export jobs now save their progress between batches. If a worker restarts, its replacement continues from the last completed batch instead of starting the export again. This recovery path is implemented for CSV exports; PDF exports still restart from the beginning.
+
+## Install
+
+Clone this repository and copy its `changelog` directory into your agent's skill directory. For Codex:
+
+```bash
+git clone https://github.com/chrischabot/changelog-skill.git
+mkdir -p ~/.agents/skills
+cp -R changelog-skill/changelog ~/.agents/skills/changelog
+```
+
+Check that the destination does not already exist before copying. Codex detects skill changes automatically, so restart it only if the skill does not appear. To install for one repository, use `.agents/skills/changelog` instead; the [Codex skill documentation](https://learn.chatgpt.com/docs/build-skills) covers the other locations.
+
+The skill uses the `SKILL.md` format and needs no particular model provider, connector or companion skill. Other compatible agents can load the same directory, although end-to-end validation has only been done in Codex. The collector and evaluation runner need Python 3.10+, Git and IANA timezone data; they use only the standard library and make no network calls.
+
+## Usage
+
+Invoke the skill in Codex with the repositories, dates and, if you have a preference, an audience and output location:
 
 ```text
 $changelog
@@ -19,77 +45,26 @@ Write for senior engineers and technical leadership.
 Save the draft and evidence under /work/reports/june-update.
 ```
 
-You can also ask naturally: “Write a change log for these repositories for the last two weeks.” The agent resolves the dates and scope before researching. It asks for genuinely missing inputs, rather than making you fill out a long brief.
+You can also ask in ordinary words, as in "Write a change log for these repositories for the last two weeks", although automatic selection of the skill has not been established, so use `$changelog` if the agent does not pick it up. The agent resolves the dates and scope before researching and asks only for inputs it genuinely cannot work out. Repositories are treated as read-only during research. Publishing is a separate step that happens only when you ask for it and authorize it, and private evidence stays out of the report.
 
-## What it produces
+The agent runs the history collector when it is useful, and the [evidence guide](changelog/references/evidence.md) explains how to run it yourself across several repositories or at pinned revisions. Its output and the evidence ledger can contain secrets and private names, so keep them out of public repositories.
 
-- **A complete Markdown changelog**, with updates ordered by significance and grouped around capabilities and outcomes.
-- **A separate evidence ledger**, connecting claims to source revisions, previous behavior, tests, readiness, and meaningful exclusions.
-- **A short workflow and review note**, recording the actual cutoff, checks performed, and material unresolved limits.
-- **Useful exploration links**, usually one to three per update where relevant documentation, APIs, source, or demos exist.
+## Validation
 
-The update's length follows the amount of noteworthy work. Individual entries stay succinct, but the skill does not force a busy fortnight into three themes or turn every commit into a release-note fragment.
+Unit tests can't tell you whether a changelog is any good, and most of this skill is instructions rather than code, so the [evaluation suite](changelog/evals/README.md) makes the review itself repeatable. You supply a writer, a different reviewer and the isolation between them, and its runner holds back the expected outcomes, freezes each submission by hash and will not pass a writing submission until a named reviewer has judged that exact text.
 
-A synthetic example of the intended level of detail:
+[VALIDATION.md](VALIDATION.md) records the results, failures included. Two blind replays against a private, previously accepted report fell short of it, missing substantive changes and, in the second run, losing material security qualifications, and those failures became the coverage and message-planning rules now in the skill. A final informed pass of review and correction reached that report's substantive coverage, but the final skill has not had a third blind replay. It is a regression case rather than a benchmark, so plan to check what the agent writes against its ledger and not to publish a first draft unread.
 
-> **Scheduled exports resume after a worker restart**
->
-> Export jobs now save their progress between batches. If a worker restarts, its replacement continues from the last completed batch instead of starting the export again. This recovery path is implemented for CSV exports; PDF exports still restart from the beginning.
+## Development
 
-The entry gives a reader the change, its practical consequence, and the limit that affects use. The commits and recovery-test results belong in its evidence record.
-
-## How it works
-
-The workflow separates research, evidence gathering, grouping, drafting, technical verification, and editorial critique. It starts from the full reporting window, compares changes with the earlier state, and checks implementation and dated records before writing.
-
-Its editorial pass examines every sentence and paragraph. Shared engineering terminology is welcome; unexplained internal names need context. The main result leads, important numbers retain their denominators, and lists of receipts or test procedures move into the evidence ledger. Shortening means choosing what matters, not removing the context that makes a sentence understandable.
-
-Claims stay within the evidence. Implemented does not mean deployed, and deployed does not mean verified in use. A corrected test score is not automatically a product improvement. Familiar comparisons explain a development model without promising compatibility that has not been established.
-
-Links make the report a starting point for exploring the work. The skill checks their relevance and currency, so a stale documentation page becomes an issue to resolve instead of a misleading recommendation.
-
-## Install
-
-Clone this repository, then copy its `changelog` directory into your agent's skill directory. For current Codex local discovery:
-
-```bash
-git clone https://github.com/chrischabot/changelog-skill.git
-mkdir -p ~/.agents/skills
-cp -R changelog-skill/changelog ~/.agents/skills/changelog
-```
-
-Check that the destination does not already exist before copying. Codex detects skill changes automatically; restart it if the skill does not appear. Repository-scoped installation can use `.agents/skills/changelog` instead. See the [official Codex skill documentation](https://developers.openai.com/codex/skills) for current locations and invocation options.
-
-The skill uses the `SKILL.md` format and has no required model provider, connector, or private skill dependency. Other compatible agents can load the same directory, but this repository's end-to-end validation is performed in Codex. The optional history collector needs Python 3.10+, Git, and IANA timezone data; it uses only the Python standard library and makes no network calls.
-
-## Scope and safety
-
-Research is read-only. The collector pins revisions, includes older work merged during the window, deduplicates repository aliases, and preserves dirty checkouts. Private evidence stays separate from the public report. External editorial review requires permission to disclose the material involved.
-
-Publishing is a conditional follow-up, not an automatic side effect of requesting a changelog. When authorized, the workflow includes full-text approval where required, the site's documented build, selective commits, and verification of the actual page. It preserves unrelated work and reports deployment separately from live verification.
-
-## Validation and development
-
-Run the deterministic collector and evaluation-runner tests with:
+The installable skill lives in `changelog/`: [`SKILL.md`](changelog/SKILL.md) is the workflow the agent follows, [`references/`](changelog/references) holds the evidence, editorial, publishing and validation guidance, and [`scripts/`](changelog/scripts) holds the collector and evaluation runner. The tests for both scripts run from the repository root:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-They cover calendar and daylight-saving boundaries, older merged commits, repository aliases, conflicting revisions, shallow history, empty windows, and preservation of source files and previous evidence. Runner tests check withheld answers, immutable submissions, stale reviews, missing audit items, fabricated quotations, unresolved findings and shortening constraints.
+## Credits and license
 
-Writing quality needs a different test. The [validation protocol](changelog/references/validation.md) runs the complete skill without revealing the accepted report, then compares coverage, factual fidelity, clarity, and useful links. It does not grade by matching wording or section counts. See [VALIDATION.md](VALIDATION.md) for the results and limits of this release's replay.
+The workflow draws on [Servo's engineering-update process](https://github.com/servo/servo.org#how-to-write-a-monthly-update), [Keep a Changelog](https://keepachangelog.com/en/2.0.0/) and [Google's developer documentation guidance](https://developers.google.com/style/highlights). The [source notes](changelog/references/sources.md) explain how each is applied, along with the Servo and Ladybird updates it uses as examples, Wikipedia's Signs of AI writing checklist and OpenAI's skill guidance.
 
-The [runnable eval suite](changelog/evals/README.md) packages that process with synthetic multi-repository, shortening and invocation cases, plus a private-repository replay adapter. It separates writer and reviewer packets, freezes each draft, records sentence and paragraph reviews, and rejects stale or incomplete assessments. It never treats passing structural checks as proof of good writing.
-
-```bash
-python3 changelog/scripts/evaluate.py prepare --case fortnight --output "$HOME/changelog-evals/run-01"
-```
-
-The command prepares the task; it does not call a model service. Follow the returned writer request, capture the output, and have it reviewed using the suite's instructions.
-
-The workflow draws on [Servo's engineering-update process](https://github.com/servo/servo.org#how-to-write-a-monthly-update), [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and [Google's developer documentation guidance](https://developers.google.com/style/highlights). The [source notes](changelog/references/sources.md) explain how the guidance is applied.
-
-## License
-
-MIT. See [LICENSE](LICENSE). A copy travels with the installable skill directory. Linked third-party guidance remains under its own license.
+Released under the [MIT License](LICENSE), copyright 2026 Chris Chabot. A copy travels with the installable skill directory, and linked third-party guidance remains under its own license.
