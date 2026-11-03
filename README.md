@@ -63,6 +63,10 @@ The installable skill lives in `changelog/`: [`SKILL.md`](changelog/SKILL.md) is
 python3 -m unittest discover -s tests -v
 ```
 
+## Project background
+
+- [Changelog project overview](https://chabot.dev/projects/#changelog-skill) on Chris Chabot’s site.
+
 ## Credits and license
 
 The workflow draws on [Servo's engineering-update process](https://github.com/servo/servo.org#how-to-write-a-monthly-update), [Keep a Changelog](https://keepachangelog.com/en/2.0.0/) and [Google's developer documentation guidance](https://developers.google.com/style/highlights). The [source notes](changelog/references/sources.md) explain how each is applied, along with the Servo and Ladybird updates it uses as examples, Wikipedia's Signs of AI writing checklist and OpenAI's skill guidance.
